@@ -87,9 +87,6 @@ class Game {
         this.sounds = {}; // place to keep sounds
         this.fonts = {}; // place to keep fonts
 
-        this.player = {};
-        this.enemies = {};
-
         // setup event listeners
         // handle keyboard events
         document.addEventListener('keydown', ({ code }) => this.handleKeyboardInput('keydown', code), false);
