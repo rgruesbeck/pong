@@ -1,0 +1,13 @@
+# Node modules
+node_modules
+
+# Koji builds
+.internals/config.json
+manifest.webmanifest
+
+# Parcel Builds
+dist
+.cache
+
+# tmp
+.tmp

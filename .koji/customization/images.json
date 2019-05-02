@@ -1,0 +1,21 @@
+{
+  "images": {
+    "playerImage": "https://i.imgur.com/FJEfD6a.png"
+  },
+  "@@editor": [
+    {
+      "key": "images",
+      "name": "Images",
+      "icon": "🖼️",
+      "source": "images.json",
+      "fields": [
+        {
+          "key": "playerImage",
+          "name": "Player Image",
+          "description": "Player image",
+          "type": "image"
+        }
+      ]
+    }
+  ]
+}

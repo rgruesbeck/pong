@@ -1,0 +1,20 @@
+{
+  "name": "gamecanvas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "npx watch 'node .internals/config.js' .koji & npx parcel index.html",
+    "build": "node .internals/config.js; npx parcel build index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "parcel-bundler": "^1.12.3",
+    "watch": "^1.0.2",
+    "webfontloader": "^1.6.28"
+  }
+}
