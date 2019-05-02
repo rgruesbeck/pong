@@ -32,6 +32,7 @@ import {
     loadFont
 } from './helpers/loaders.js';
 
+import Image from './objects/image.js';
 import Player from './characters/player.js';
 
 class Game {
@@ -119,6 +120,8 @@ class Game {
         
         // make a list of assets
         const gameAssets = [
+            loadImage('backgroundImage', this.config.images.backgroundImage),
+            loadImage('ballImage', this.config.images.ballImage),
             loadSound('backgroundMusic', this.config.sounds.backgroundMusic),
             loadFont('gameFont', this.config.settings.fontFamily)
         ];
@@ -142,7 +145,6 @@ class Game {
         let playerHeight = 35 * scale;
         let playerWidth = 5 * scale;
 
-
         this.player1 = new Player({
             ctx: this.ctx,
             color: this.config.colors.textColor,
@@ -165,6 +167,29 @@ class Game {
             bounds: this.screen
         });
 
+
+        // field
+        this.field = new Image({
+            ctx: this.ctx,
+            image: this.images.backgroundImage,
+            x: 0,
+            y: 0,
+            width: this.screen.right,
+            height: this.screen.bottom
+        });
+
+
+        // ball
+        this.ball = new Image({
+            ctx: this.ctx,
+            image: this.images.ballImage,
+            x: 0,
+            y: 0,
+            width: 60,
+            height: 60
+        })
+
+
         // set overlay styles
         this.overlay.setStyles({...this.config.colors, ...this.config.settings});
 
@@ -180,6 +205,7 @@ class Game {
 
         // draw and do stuff that you need to do
         // no matter the game state
+        this.field.draw();
 
         // ready to play
         if (this.state.current === 'ready') {
@@ -205,14 +231,20 @@ class Game {
         if (this.state.current === 'play') {
             if (!this.state.muted) { this.sounds.backgroundMusic.play(); }
 
+            // player 1
             let dy1 = (this.input.keyboard.up ? -1 : 0) + (this.input.keyboard.down ? 1 : 0);
 
             this.player1.move(0, dy1, this.frame.scale);
             this.player1.draw();
 
+            // player 2
             let dy2 = dy1 / 2;
+
             this.player2.move(0, dy2, this.frame.scale);
             this.player2.draw();
+
+            // ball
+            this.ball.draw();
         }
 
         // player wins

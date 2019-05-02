@@ -1,6 +1,7 @@
 {
   "images": {
-    "playerImage": "https://i.imgur.com/FJEfD6a.png"
+    "backgroundImage": "https://i.imgur.com/XcWXEDR.png",
+    "ballImage": "https://i.imgur.com/sujKkKx.png"
   },
   "@@editor": [
     {
@@ -10,9 +11,15 @@
       "source": "images.json",
       "fields": [
         {
-          "key": "playerImage",
-          "name": "Player Image",
-          "description": "Player image",
+          "key": "backgroundImage",
+          "name": "Background Image",
+          "description": "Background image",
+          "type": "image"
+        },
+        {
+          "key": "ballImage",
+          "name": "Ball Image",
+          "description": "Ball image",
           "type": "image"
         }
       ]
