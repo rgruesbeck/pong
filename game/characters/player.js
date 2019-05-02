@@ -3,7 +3,7 @@
  * 
  * What it Does:
  *   This file is a basic player character
- *   it extends the iamgeSprite class and adds two collision detections methods
+ *   it extends the Sprite class and adds two collision detections methods
  * 
  * What to Change:
  *   Add any character specific methods
@@ -11,11 +11,19 @@
  * 
  */
 
-import ImageSprite from '../objects/imageSprite.js';
+import Sprite from '../objects/sprite.js';
 
-class Player extends ImageSprite {
+class Player extends Sprite {
     constructor(options) {
         super(options);
+
+        this.ctx = options.ctx;
+        this.color = options.color;
+    }
+
+    draw() {
+        this.ctx.fillStyle = this.color;
+        this.ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
     collisionsWith(entities) {

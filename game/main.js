@@ -122,7 +122,6 @@ class Game {
         
         // make a list of assets
         const gameAssets = [
-            loadImage('playerImage', this.config.images.playerImage),
             loadSound('backgroundMusic', this.config.sounds.backgroundMusic),
             loadFont('gameFont', this.config.settings.fontFamily)
         ];
@@ -141,18 +140,28 @@ class Game {
     create() {
         // create game characters
 
-        const { scale, centerX, centerY } = this.screen;
-        const { playerImage } = this.images;
+        const { scale, centerY, right } = this.screen;
+
+        let playerHeight = 35 * scale;
+        let playerWidth = 5 * scale;
 
 
-        let playerHeight = 60 * scale;
-        let playerWidth = 70 * scale;
-
-        this.player = new Player({
+        this.player1 = new Player({
             ctx: this.ctx,
-            image: playerImage,
-            x: centerX - playerWidth / 4,
-            y: centerY,
+            color: this.config.colors.textColor,
+            x: right - playerWidth,
+            y: centerY - playerHeight / 2,
+            width: playerWidth,
+            height: playerHeight,
+            speed: 50,
+            bounds: this.screen
+        })
+
+        this.player2 = new Player({
+            ctx: this.ctx,
+            color: this.config.colors.textColor,
+            x: 0,
+            y: centerY - playerHeight / 2,
             width: playerWidth,
             height: playerHeight,
             speed: 50,
@@ -189,20 +198,24 @@ class Game {
             this.overlay.setMute(this.state.muted);
             this.overlay.setPause(this.state.paused);
 
+            //dev
+            this.setState({ current: 'play' });
+            this.overlay.hideBanner();
+            this.overlay.hideButton();
         }
 
         // game play
         if (this.state.current === 'play') {
             if (!this.state.muted) { this.sounds.backgroundMusic.play(); }
 
-            // let dy = 10 * Math.cos(this.frame.count/ 60);
-            // let dx = 5 * Math.cos(this.frame.count/ 30);
+            let dy1 = (this.input.keyboard.up ? -1 : 0) + (this.input.keyboard.down ? 1 : 0);
 
-            let dx = (this.input.keyboard.left ? -1 : 0) + (this.input.keyboard.right ? 1 : 0);
-            let dy = (this.input.keyboard.up ? -1 : 0) + (this.input.keyboard.down ? 1 : 0);
+            this.player1.move(0, dy1, this.frame.scale);
+            this.player1.draw();
 
-            this.player.move(dx, dy, this.frame.scale);
-            this.player.draw();
+            let dy2 = dy1 / 2;
+            this.player2.move(0, dy2, this.frame.scale);
+            this.player2.draw();
         }
 
         // player wins
