@@ -66,6 +66,7 @@ class Game {
         this.state = {
             current: 'ready',
             prev: 'loading',
+            winScore: 10,
             paused: false,
             muted: localStorage.getItem('game-muted') === 'true'
         };
@@ -128,6 +129,8 @@ class Game {
         const gameAssets = [
             loadImage('backgroundImage', this.config.images.backgroundImage),
             loadImage('ballImage', this.config.images.ballImage),
+            loadSound('bounceSound', this.config.sounds.bounceSound),
+            loadSound('scoreSound', this.config.sounds.scoreSound),
             loadSound('backgroundMusic', this.config.sounds.backgroundMusic),
             loadFont('gameFont', this.config.settings.fontFamily)
         ];
@@ -229,8 +232,8 @@ class Game {
         this.ctx.globalAlpha = 1;
 
         // update scores
-        this.overlay.setScore1(this.player1.score);
-        this.overlay.setScore2(this.player2.score);
+        this.overlay.setScore1(`${this.player1.score}/${this.state.winScore}`);
+        this.overlay.setScore2(`${this.player2.score}/${this.state.winScore}`);
 
         // ready to play
         if (this.state.current === 'ready') {
@@ -240,11 +243,14 @@ class Game {
             this.overlay.setBanner('Game');
             this.overlay.setButton('Play');
             this.overlay.showStats();
-            this.overlay.setScore1(this.player1.score);
-            this.overlay.setScore2(this.player2.score);
 
             this.overlay.setMute(this.state.muted);
             this.overlay.setPause(this.state.paused);
+
+            this.overlay.setInstructions({
+                desktop: this.config.settings.instructionsDesktop,
+                mobile: this.config.settings.instructionsMobile
+            });
 
             //dev
             //this.setState({ current: 'play' });
@@ -258,7 +264,18 @@ class Game {
             if (this.state.prev === 'ready') {
                 this.overlay.hideBanner();
                 this.overlay.hideButton();
+                this.overlay.hideInstructions();
             }
+
+            // check for winner
+            if (this.player1.score === this.state.winScore) {
+                this.setState({ current: 'win-player1'})
+            }
+
+            if (this.player2.score === this.state.winScore) {
+                this.setState({ current: 'win-player2'})
+            }
+
 
             if (!this.state.muted) { this.sounds.backgroundMusic.play(); }
 
@@ -299,6 +316,9 @@ class Game {
             // bounce ball off player1
             let collided = this.ball.collisionsWith([this.player1, this.player2]);
             if (collided && collided.name === 'player1') {
+                // play bounce sound
+                this.sounds.bounceSound.currentTime = 0;
+                this.sounds.bounceSound.play();
 
                 // add some velocity
                 let extraPushX = this.player1.vy / 50;
@@ -307,11 +327,19 @@ class Game {
 
             // bounce ball off player2
             if (collided && collided.name === 'player2') {
+                // play bounce sound
+                this.sounds.bounceSound.currentTime = 0;
+                this.sounds.bounceSound.play();
+
                 this.ball.dx = 1;
             }
 
             // if ball touches left side, player1 scores
             if (this.ball.launched && this.ball.x <= this.ball.bounds.left) {
+                // play score sound
+                this.sounds.scoreSound.currentTime = 0;
+                this.sounds.scoreSound.play();
+
                 // give player1 one point
                 this.player1.score += 1;
 
@@ -321,6 +349,10 @@ class Game {
 
             // if ball touches right side, player2 scores
             if (this.ball.launched && this.ball.x + this.ball.width >= this.ball.bounds.right) {
+                // play score sound
+                this.sounds.scoreSound.currentTime = 0;
+                this.sounds.scoreSound.play();
+
                 // give player2 one point
                 this.player2.score += 1;
 
@@ -332,13 +364,12 @@ class Game {
         }
 
         // player wins
-        if (this.state.current === 'win') {
-
+        if (this.state.current === 'win-player1') {
+            this.overlay.setBanner('Winner!')
         }
 
-        // game over
-        if (this.state.current === 'over') {
-
+        if (this.state.current === 'win-player2') {
+            this.overlay.setBanner('Try again!')
         }
 
         // draw the next screen
@@ -383,6 +414,9 @@ class Game {
             this.relaunchBall();
         }
 
+        if (this.state.current.includes('win')) {
+            document.location.reload();
+        }
     }
 
     handleKeyboardInput(type, code) {
@@ -424,10 +458,13 @@ class Game {
 
             // Launch ball or Start
             if (code === 'Space' || code === 'Enter') {
-                if (this.state.current === 'play') {
+                let onSide = this.ball.launched === false && this.ball.x > this.screen.centerX;
+                if (this.state.current === 'play' && onSide) {
                     this.relaunchBall()
-                } else {
-                    this.setState({ current: 'play' });
+                }
+
+                if (this.state.current.includes('win')) {
+                    document.location.reload();
                 }
             }
         }

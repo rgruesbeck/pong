@@ -32,6 +32,8 @@ class Overlay {
         this.banner = node.querySelector('#banner');
         this.button = node.querySelector('#button');
 
+        this.instructions = node.querySelector('#instructions');
+
         this.score1 = node.querySelector('#score1');
         this.score2 = node.querySelector('#score2');
         this.mute = node.querySelector('#mute');
@@ -67,17 +69,34 @@ class Overlay {
         this.hide('button');
     }
 
+    setInstructions({ desktop, mobile }) {
+        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
+            // show mobile instructions
+
+            this.instructions.textContent = mobile;
+        } else {
+            // show desktop instructions
+
+            this.instructions.textContent = desktop;
+        }
+        this.show('instructions');
+    }
+
+    hideInstructions() {
+        this.hide('instructions');
+    }
+
     showStats() {
         this.show('score1');
         this.show('score2');
     }
 
     setScore1(score) {
-        this.score1.textContent = `Player 1: ${score}`;
+        this.score1.textContent = `Player: ${score}`;
     }
 
     setScore2(score) {
-        this.score2.textContent = `Player 2: ${score}`;
+        this.score2.textContent = `Computer: ${score}`;
     }
 
     setStyles(styles) {
