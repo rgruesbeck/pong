@@ -20,6 +20,7 @@ class Player extends Sprite {
         this.ctx = options.ctx;
         this.color = options.color;
         this.name = options.name;
+        this.score = 0;
     }
 
     draw() {

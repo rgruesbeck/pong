@@ -29,4 +29,13 @@ const throttled = (delay, fn) => {
     }
 }
 
-export { throttled };
+// boundBy
+// apply a lower and upper bound to a number
+const boundBy = (n, upper, lower) => {
+    return [n]
+    .map(n => n < lower ? lower : n)
+    .map(n => n > upper ? upper : n)
+    .reduce(n => n);
+}
+
+export { throttled, boundBy };

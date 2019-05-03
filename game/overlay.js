@@ -32,8 +32,8 @@ class Overlay {
         this.banner = node.querySelector('#banner');
         this.button = node.querySelector('#button');
 
-        this.score = node.querySelector('#score');
-        this.lives = node.querySelector('#lives');
+        this.score1 = node.querySelector('#score1');
+        this.score2 = node.querySelector('#score2');
         this.mute = node.querySelector('#mute');
         this.pause = node.querySelector('#pause');
 
@@ -68,16 +68,16 @@ class Overlay {
     }
 
     showStats() {
-        this.show('score');
-        this.show('lives');
+        this.show('score1');
+        this.show('score2');
     }
 
-    setScore(score) {
-        this.score.textContent = `Score: ${score}`;
+    setScore1(score) {
+        this.score1.textContent = `Player 1: ${score}`;
     }
 
-    setLives(lives) {
-        this.lives.textContent = `Lives: ${lives}`;
+    setScore2(score) {
+        this.score2.textContent = `Player 2: ${score}`;
     }
 
     setStyles(styles) {

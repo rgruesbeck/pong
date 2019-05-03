@@ -17,9 +17,9 @@ class Ball extends ImageSprite {
     constructor(options) {
         super(options);
 
-        this.dx = 1;
-        this.dy = 1;
-        this.launched = true;
+        this.dx = -1;
+        this.dy = -1;
+        this.launched = false;
     }
 
     move(m) {
@@ -28,17 +28,19 @@ class Ball extends ImageSprite {
         super.move(this.dx, this.dy, m);
     }
 
-    launch(delay, dx) {
+    launch(delay, dx, offset) {
+        let totalOffset = (offset + this.width) * dx;
+
         this.stop();
         if (delay) {
             setTimeout(() => {
                 this.launched = true;
-                this.x = this.x + dx;
+                this.x = this.x + totalOffset;
                 this.dx = dx;
             }, delay);
         } else {
             this.launched = true;
-            this.x = this.x + dx;
+            this.x = this.x + totalOffset;
             this.dx = dx;
         }
     }
@@ -56,10 +58,10 @@ class Ball extends ImageSprite {
     };
 
     collidesWith(entity) {
-        let vx = entity.cx - this.cx;
-        let vy = entity.cy - this.cy;
-        let distance = Math.sqrt(vx * vx + vy * vy);
-        return distance < (entity.radius + this.radius);
+        let distanceX = Math.abs(entity.cx - this.cx);
+        let onY = this.cy > entity.y && this.cy < entity.y + entity.height;
+
+        return onY && distanceX < (entity.width / 2 + this.width / 2);
     }
 }
 

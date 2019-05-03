@@ -32,6 +32,8 @@ import {
     loadFont
 } from './helpers/loaders.js';
 
+import { boundBy } from './helpers/utils.js';
+
 import Image from './objects/image.js';
 import Player from './characters/player.js';
 import Ball from './characters/ball.js';
@@ -91,18 +93,21 @@ class Game {
 
         // setup event listeners
         // handle keyboard events
-        document.addEventListener('keydown', ({ code }) => this.handleKeyboardInput('keydown', code), false);
-        document.addEventListener('keyup', ({ code }) => this.handleKeyboardInput('keyup', code), false);
+        document.addEventListener('keydown', ({ code }) => this.handleKeyboardInput('keydown', code));
+        document.addEventListener('keyup', ({ code }) => this.handleKeyboardInput('keyup', code));
+
+        // setup event listeners for mouse movement
+        document.addEventListener('mousemove', ({ clientY }) => this.handleMouseMove(clientY));
 
         // handle overlay clicks
-        this.overlay.root.addEventListener('click', ({ target }) => this.handleClicks(target), false);
+        this.overlay.root.addEventListener('click', ({ target }) => this.handleClicks(target));
 
         // handle resize events
-        window.addEventListener('resize', () => this.handleResize(), false);
-        window.addEventListener("orientationchange", (e) => this.handleResize(e), false);
+        window.addEventListener('resize', () => this.handleResize());
+        window.addEventListener("orientationchange", (e) => this.handleResize(e));
 
         // handle post message
-        window.addEventListener('message', (e) => this.handlePostMessage(e), false);
+        window.addEventListener('message', (e) => this.handlePostMessage(e));
 
         // set document body to backgroundColor
         document.body.style.backgroundColor = this.config.colors.backgroundColor;
@@ -189,8 +194,8 @@ class Game {
         this.ball = new Ball({
             ctx: this.ctx,
             image: this.images.ballImage,
-            x: -ballWidth,
-            y: 0,
+            x: this.screen.right + ballWidth,
+            y: this.player1.y,
             width: ballWidth,
             height: ballHeight,
             speed: 20,
@@ -223,6 +228,10 @@ class Game {
 
         this.ctx.globalAlpha = 1;
 
+        // update scores
+        this.overlay.setScore1(this.player1.score);
+        this.overlay.setScore2(this.player2.score);
+
         // ready to play
         if (this.state.current === 'ready') {
             this.overlay.hideLoading();
@@ -231,35 +240,54 @@ class Game {
             this.overlay.setBanner('Game');
             this.overlay.setButton('Play');
             this.overlay.showStats();
-            this.overlay.setLives('10');
-            this.overlay.setScore('10');
+            this.overlay.setScore1(this.player1.score);
+            this.overlay.setScore2(this.player2.score);
 
             this.overlay.setMute(this.state.muted);
             this.overlay.setPause(this.state.paused);
 
             //dev
-            this.setState({ current: 'play' });
-            this.overlay.hideBanner();
-            this.overlay.hideButton();
+            //this.setState({ current: 'play' });
+            // this.overlay.hideBanner();
+            // this.overlay.hideButton();
         }
 
         // game play
         if (this.state.current === 'play') {
+            // hide overlays if coming from ready
+            if (this.state.prev === 'ready') {
+                this.overlay.hideBanner();
+                this.overlay.hideButton();
+            }
+
             if (!this.state.muted) { this.sounds.backgroundMusic.play(); }
 
             // player 1
-            let dy1 = (this.input.keyboard.up ? -1 : 0) + (this.input.keyboard.down ? 1 : 0);
+            if (this.input.active === 'keyboard') {
+                let dy1 = (this.input.keyboard.up ? -1 : 0) + (this.input.keyboard.down ? 1 : 0);
+                this.player1.move(0, dy1, this.frame.scale);
+            }
 
-            this.player1.move(0, dy1, this.frame.scale);
+            if (this.input.active === 'mouse') {
+                let y = this.input.mouse.y - this.canvas.offsetTop;
+                let diffY =  y - this.player1.y - this.player1.height / 2;
+                this.player1.move(0, diffY / 100, 1);
+            }
+
             this.player1.draw();
 
             // player 2
             if (this.ball.launched && this.ball.dx < 0) {
+
+                // move computer player toward the ball
+                // get diffY and calculate dy
                 let diffY = this.ball.y - this.player2.y;
                 let dy2 = diffY / (this.ball.x * 2); 
-                this.player2.move(0, dy2, this.frame.scale);
-            }
 
+                // apply a speed limit
+                let dy2capped = boundBy(dy2, 1, -1);
+                this.player2.move(0, dy2capped, this.frame.scale);
+            }
 
             this.player2.draw();
 
@@ -271,7 +299,10 @@ class Game {
             // bounce ball off player1
             let collided = this.ball.collisionsWith([this.player1, this.player2]);
             if (collided && collided.name === 'player1') {
-                this.ball.dx = -1;
+
+                // add some velocity
+                let extraPushX = this.player1.vy / 50;
+                this.ball.dx = -1 + extraPushX;
             }
 
             // bounce ball off player2
@@ -281,12 +312,18 @@ class Game {
 
             // if ball touches left side, player1 scores
             if (this.ball.launched && this.ball.x <= this.ball.bounds.left) {
+                // give player1 one point
+                this.player1.score += 1;
+
                 this.ball.setY(this.player2.y);
-                this.ball.launch(3000, 1);
+                this.ball.launch(3000, 1, this.player2.width);
             }
 
             // if ball touches right side, player2 scores
             if (this.ball.launched && this.ball.x + this.ball.width >= this.ball.bounds.right) {
+                // give player2 one point
+                this.player2.score += 1;
+
                 this.ball.stop();
             }
 
@@ -310,7 +347,7 @@ class Game {
 
     relaunchBall() {
         this.ball.setY(this.player1.y);
-        this.ball.launch(null, -1);
+        this.ball.launch(null, -1, this.player1.width);
     }
 
     // event listeners
@@ -332,8 +369,6 @@ class Game {
         // button
         if ( target.id === 'button') {
             this.setState({ current: 'play' });
-            this.overlay.hideBanner();
-            this.overlay.hideButton();
 
             // if defaulting to have sound on by default
             // double mute() to warmup iphone audio here
@@ -343,7 +378,8 @@ class Game {
         }
 
         // relaunch ball
-        if (this.state.current === 'play' && this.ball.launched === false) {
+        let onSide = this.ball.launched === false && this.ball.x > this.screen.centerX;
+        if (this.state.current === 'play' && onSide) {
             this.relaunchBall();
         }
 
@@ -381,11 +417,25 @@ class Game {
                 this.input.keyboard.left = false
             }
 
-            // spacebar: pause and play game
-            if (code === 'Space') {
+            // KeyP: pause and play game
+            if (code === 'KeyP') {
                 this.pause();
             }
+
+            // Launch ball or Start
+            if (code === 'Space' || code === 'Enter') {
+                if (this.state.current === 'play') {
+                    this.relaunchBall()
+                } else {
+                    this.setState({ current: 'play' });
+                }
+            }
         }
+    }
+
+    handleMouseMove(y) {
+        this.input.active = 'mouse';
+        this.input.mouse.y = y;
     }
 
     handleResize() {

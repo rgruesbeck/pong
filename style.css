@@ -86,7 +86,7 @@ canvas {
     background-color: rgba(255, 255, 255,0.5);
 }
 
-.container #score {
+.container #score1 {
     visibility: hidden;
     opacity: 0;
     position: absolute;
@@ -97,7 +97,7 @@ canvas {
     font-size: 1.25em;
 }
 
-.container #lives {
+.container #score2 {
     visibility: hidden;
     opacity: 0;
     position: absolute;
