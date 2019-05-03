@@ -66,7 +66,7 @@ class Game {
         this.state = {
             current: 'ready',
             prev: 'loading',
-            winScore: 10,
+            winScore: this.config.settings.winScore,
             paused: false,
             muted: localStorage.getItem('game-muted') === 'true'
         };
@@ -100,15 +100,15 @@ class Game {
         // setup event listeners for mouse movement
         document.addEventListener('mousemove', ({ clientY }) => this.handleMouseMove(clientY));
 
+        // setup event listeners for mouse movement
+        document.addEventListener('touchmove', ({ touches }) => this.handleTouchMove(touches[0]));
+
         // handle overlay clicks
         this.overlay.root.addEventListener('click', ({ target }) => this.handleClicks(target));
 
         // handle resize events
         window.addEventListener('resize', () => this.handleResize());
         window.addEventListener("orientationchange", (e) => this.handleResize(e));
-
-        // handle post message
-        window.addEventListener('message', (e) => this.handlePostMessage(e));
 
         // set document body to backgroundColor
         document.body.style.backgroundColor = this.config.colors.backgroundColor;
@@ -290,10 +290,16 @@ class Game {
                 let diffY =  y - this.player1.y - this.player1.height / 2;
                 this.player1.move(0, diffY / 100, 1);
             }
+            
+            if (this.input.active === 'touch') {
+                let y = this.input.touch.y - this.canvas.offsetTop;
+                let diffY =  y - this.player1.y - this.player1.height / 2;
+                this.player1.move(0, diffY / 100, 1);
+            }
 
             this.player1.draw();
 
-            // player 2
+            // player 2 (computer)
             if (this.ball.launched && this.ball.dx < 0) {
 
                 // move computer player toward the ball
@@ -475,16 +481,16 @@ class Game {
         this.input.mouse.y = y;
     }
 
+    handleTouchMove(touch) {
+        let { clientY } = touch;
+
+        this.input.active = 'touch';
+        this.input.touch.y = clientY;
+    }
+
     handleResize() {
 
         document.location.reload();
-    }
-
-    handlePostMessage(e) {
-        // for koji messages
-        // https://gist.github.com/rgruesbeck/174d29f244494ead21e2621f6f0d79ee
-
-        console.log('postmesage');
     }
 
     // game helpers

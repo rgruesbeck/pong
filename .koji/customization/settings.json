@@ -3,9 +3,10 @@
       "name": "Game",
       "startText": "Start",
       "gameoverText": "Game Over",
-      "instructionsMobile": "Swipe up or down to move: [ ⇡ ⇣ ]",
-      "instructionsDesktop": "Use arrow keys or mouse to move: [ ⇡ ⇣ ]",
+      "instructionsMobile": "Tap to launch ball. Swipe up or down to move [ ⇡ ⇣ ]",
+      "instructionsDesktop": "Use spacebar to launch ball. Use arrow keys or mouse to move: [ ⇡ ⇣ ]",
       "gameTopBar": true,
+      "winScore": 10,
       "fontFamily": "Bungee Inline"
     },
     "@@editor": [
@@ -38,6 +39,10 @@
           {
             "key": "gameTopBar",
             "name": "If game should have a top bar or not"
+          },
+          {
+            "key": "winScore",
+            "name": "Score need for player to win game"
           },
           {
             "key": "fontFamily",
