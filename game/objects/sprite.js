@@ -43,7 +43,7 @@ class Sprite {
         if (inBoundsX) {
             this.setX(dx);
         } else {
-            let snapTo = dx < 0 ? 0 : this.bounds.right - this.width;
+            let snapTo = dx < this.bounds.left ? this.bounds.left : this.bounds.right - this.width;
             this.setX(snapTo);
         }
 
@@ -52,7 +52,7 @@ class Sprite {
         if (inBoundsY) {
             this.setY(dy);
         } else {
-            let snapTo = dy < 0 ? 0 : this.bounds.bottom - this.height;
+            let snapTo = dy < this.bounds.top ? this.bounds.top : this.bounds.bottom - this.height;
             this.setY(snapTo);
         }
 

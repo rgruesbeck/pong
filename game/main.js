@@ -34,6 +34,7 @@ import {
 
 import Image from './objects/image.js';
 import Player from './characters/player.js';
+import Ball from './characters/ball.js';
 
 class Game {
 
@@ -142,10 +143,11 @@ class Game {
 
         const { scale, centerY, right } = this.screen;
 
-        let playerHeight = 35 * scale;
-        let playerWidth = 5 * scale;
+        let playerHeight = 60 * scale;
+        let playerWidth = 10 * scale;
 
         this.player1 = new Player({
+            name: 'player1',
             ctx: this.ctx,
             color: this.config.colors.textColor,
             x: right - playerWidth,
@@ -157,6 +159,7 @@ class Game {
         })
 
         this.player2 = new Player({
+            name: 'player2',
             ctx: this.ctx,
             color: this.config.colors.textColor,
             x: 0,
@@ -180,13 +183,23 @@ class Game {
 
 
         // ball
-        this.ball = new Image({
+        let ballWidth = 20 * scale;
+        let ballHeight = 20 * scale;
+
+        this.ball = new Ball({
             ctx: this.ctx,
             image: this.images.ballImage,
-            x: 0,
+            x: -ballWidth,
             y: 0,
-            width: 60,
-            height: 60
+            width: ballWidth,
+            height: ballHeight,
+            speed: 20,
+            bounds: {
+                top: 0,
+                right: this.screen.right + ballWidth,
+                left: this.screen.left - ballWidth,
+                bottom: this.screen.bottom
+            }
         })
 
 
@@ -200,12 +213,15 @@ class Game {
         // update game characters
 
         // clear the screen of the last picture
+        this.ctx.globalAlpha = 0.3;
         this.ctx.fillStyle = this.config.colors.backgroundColor; 
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // draw and do stuff that you need to do
         // no matter the game state
         this.field.draw();
+
+        this.ctx.globalAlpha = 1;
 
         // ready to play
         if (this.state.current === 'ready') {
@@ -238,12 +254,43 @@ class Game {
             this.player1.draw();
 
             // player 2
-            let dy2 = dy1 / 2;
+            if (this.ball.launched && this.ball.dx < 0) {
+                let diffY = this.ball.y - this.player2.y;
+                let dy2 = diffY / (this.ball.x * 2); 
+                this.player2.move(0, dy2, this.frame.scale);
+            }
 
-            this.player2.move(0, dy2, this.frame.scale);
+
             this.player2.draw();
 
             // ball
+            // bounce ball off of ceiling or floor
+            let onEdgeY = this.ball.y === this.screen.top || this.ball.y === this.screen.bottom - this.ball.height;
+            if (onEdgeY) { this.ball.dy = -this.ball.dy; }
+
+            // bounce ball off player1
+            let collided = this.ball.collisionsWith([this.player1, this.player2]);
+            if (collided && collided.name === 'player1') {
+                this.ball.dx = -1;
+            }
+
+            // bounce ball off player2
+            if (collided && collided.name === 'player2') {
+                this.ball.dx = 1;
+            }
+
+            // if ball touches left side, player1 scores
+            if (this.ball.launched && this.ball.x <= this.ball.bounds.left) {
+                this.ball.setY(this.player2.y);
+                this.ball.launch(3000, 1);
+            }
+
+            // if ball touches right side, player2 scores
+            if (this.ball.launched && this.ball.x + this.ball.width >= this.ball.bounds.right) {
+                this.ball.stop();
+            }
+
+            this.ball.move(this.frame.scale);
             this.ball.draw();
         }
 
@@ -261,8 +308,9 @@ class Game {
         this.requestFrame(() => this.play());
     }
 
-    start() {
-
+    relaunchBall() {
+        this.ball.setY(this.player1.y);
+        this.ball.launch(null, -1);
     }
 
     // event listeners
@@ -272,11 +320,13 @@ class Game {
         // mute
         if (target.id === 'mute') {
             this.mute();
+            return;
         }
 
         // pause
         if (target.id === 'pause') {
             this.pause();
+            return;
         }
 
         // button
@@ -289,6 +339,12 @@ class Game {
             // double mute() to warmup iphone audio here
             this.mute();
             this.mute();
+            return;
+        }
+
+        // relaunch ball
+        if (this.state.current === 'play' && this.ball.launched === false) {
+            this.relaunchBall();
         }
 
     }

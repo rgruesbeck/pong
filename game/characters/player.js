@@ -19,26 +19,12 @@ class Player extends Sprite {
 
         this.ctx = options.ctx;
         this.color = options.color;
+        this.name = options.name;
     }
 
     draw() {
         this.ctx.fillStyle = this.color;
         this.ctx.fillRect(this.x, this.y, this.width, this.height);
-    }
-
-    collisionsWith(entities) {
-        let result = Object.entries(entities)
-        .find((ent) => { return this.collidesWith(ent[1]); })
-        ? true : false;
-
-        return result;
-    };
-
-    collidesWith(entity) {
-        let vx = entity.cx - this.cx;
-        let vy = entity.cy - this.cy;
-        let distance = Math.sqrt(vx * vx + vy * vy);
-        return distance < (entity.radius + this.radius);
     }
 }
 
