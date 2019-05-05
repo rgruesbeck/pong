@@ -165,18 +165,19 @@ class Game {
         // create game characters
 
         const { scale, centerY, right } = this.screen;
+        const { playerHeight, playerWidth } = this.config.settings
 
-        let playerHeight = 60 * scale;
-        let playerWidth = 10 * scale;
+        let pHeight = playerHeight * scale;
+        let pWidth = playerWidth * scale;
 
         this.player1 = new Player({
             name: 'player1',
             ctx: this.ctx,
             color: this.config.colors.textColor,
-            x: right - playerWidth,
-            y: centerY - playerHeight / 2,
-            width: playerWidth,
-            height: playerHeight,
+            x: right - pWidth,
+            y: centerY - pHeight / 2,
+            width: pWidth,
+            height: pHeight,
             speed: 50,
             bounds: this.screen
         })
@@ -186,16 +187,17 @@ class Game {
             ctx: this.ctx,
             color: this.config.colors.textColor,
             x: 0,
-            y: centerY - playerHeight / 2,
-            width: playerWidth,
-            height: playerHeight,
+            y: centerY - pHeight / 2,
+            width: pWidth,
+            height: pHeight,
             speed: 50,
             bounds: this.screen
         });
 
         // ball
-        let ballWidth = 20 * scale;
-        let ballHeight = 20 * scale;
+        let { ballSpeed, ballSize } = this.config.settings;
+        let ballWidth =  ballSize * scale;
+        let ballHeight = ballSize * scale;
 
         this.ball = new Ball({
             ctx: this.ctx,
@@ -204,7 +206,7 @@ class Game {
             y: this.player1.y,
             width: ballWidth,
             height: ballHeight,
-            speed: 20,
+            speed: ballSpeed,
             bounds: {
                 top: 0,
                 right: this.screen.right + ballWidth,
@@ -315,8 +317,10 @@ class Game {
                 let diffY = this.ball.y - this.player2.y;
                 let dy2 = diffY / (this.ball.x * 2); 
 
-                // apply a speed limit
-                let dy2capped = boundBy(dy2, 1, -1);
+                // apply a difficulty/speed limit
+                let { difficulty } = this.config.settings
+                let speedLimit = difficulty / 2;
+                let dy2capped = boundBy(dy2, speedLimit, -speedLimit);
                 this.player2.move(0, dy2capped, this.frame.scale);
             }
 
@@ -335,8 +339,10 @@ class Game {
                 this.sounds.bounceSound.play();
 
                 // add some velocity
-                let extraPushX = this.player1.vy / 50;
-                this.ball.dx = -1 + extraPushX;
+                // change ball direction
+                // add some speed
+                this.ball.dx = -1;
+                this.ball.speed += 1;
             }
 
             // bounce ball off player2
@@ -345,7 +351,10 @@ class Game {
                 this.sounds.bounceSound.currentTime = 0;
                 this.sounds.bounceSound.play();
 
+                // change ball direction
+                // add some speed to ball
                 this.ball.dx = 1;
+                this.ball.speed += 1;
             }
 
             // if ball touches left side, player1 scores
@@ -356,6 +365,9 @@ class Game {
 
                 // give player1 one point
                 this.player1.score += 1;
+
+                // reset ball speed
+                this.ball.speed = this.config.settings.ballSpeed;
 
                 this.ball.setY(this.player2.y);
                 this.ball.launch(3000, 1, this.player2.width);
@@ -369,6 +381,9 @@ class Game {
 
                 // give player2 one point
                 this.player2.score += 1;
+
+                // reset ball speed
+                this.ball.speed = this.config.settings.ballSpeed;
 
                 this.ball.stop();
             }

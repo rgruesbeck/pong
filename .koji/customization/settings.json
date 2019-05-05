@@ -6,6 +6,11 @@
       "instructionsMobile": "Tap to launch ball. Swipe up or down to move [ ⇡ ⇣ ]",
       "instructionsDesktop": "Use spacebar to launch ball. Use arrow keys or mouse to move: [ ⇡ ⇣ ]",
       "gameTopBar": true,
+      "playerWidth": 10,
+      "playerHeight": 60,
+      "ballSize": 20,
+      "ballSpeed": 20,
+      "difficulty": 9,
       "winScore": 10,
       "fontFamily": "Bungee Inline"
     },
@@ -39,6 +44,26 @@
           {
             "key": "gameTopBar",
             "name": "If game should have a top bar or not"
+          },
+          {
+            "key": "playerWidth",
+            "name": "Width of players"
+          },
+          {
+            "key": "playerHeight",
+            "name": "Height of players"
+          },
+          {
+            "key": "ballSize",
+            "name": "Ball size"
+          },
+          {
+            "key": "ballSpeed",
+            "name": "Ball speed"
+          },
+          {
+            "key": "difficulty",
+            "name": "Difficulty level"
           },
           {
             "key": "winScore",
