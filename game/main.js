@@ -42,11 +42,7 @@ class Game {
 
     constructor(canvas, overlay, topbar, config) {
         this.config = config; // customization
-
         this.overlay = overlay;
-
-        this.topbar = topbar;
-        this.topbar.active = this.config.settings.gameTopBar;
 
         this.canvas = canvas; // game screen
         this.ctx = canvas.getContext("2d"); // game screen context
@@ -110,20 +106,29 @@ class Game {
         window.addEventListener('resize', () => this.handleResize());
         window.addEventListener("orientationchange", (e) => this.handleResize(e));
 
-        // set document body to backgroundColor
-        document.body.style.backgroundColor = this.config.colors.backgroundColor;
-
-        // set loading indicator to textColor
-        document.querySelector('#loading').style.color = this.config.colors.textColor;
-
-        // set topbar and topbar color
-        this.topbar.style.display = this.topbar.active ? 'block' : 'none';
-        this.topbar.style.backgroundColor = this.config.colors.primaryColor;
+        // handle koji config changes
+        Koji.on('change', (scope, key, value) => {
+            console.log('updating configs...', scope, key, value);
+            this.config[scope][key] = value;
+            this.cancelFrame(this.frame.count - 1);
+            this.load();
+        });
     }
 
     load() {
         // load pictures, sounds, and fonts
 
+        // set topbar and topbar color
+        this.topbar = topbar;
+        this.topbar.active = this.config.settings.gameTopBar;
+        this.topbar.style.display = this.topbar.active ? 'block' : 'none';
+        this.topbar.style.backgroundColor = this.config.colors.primaryColor;
+
+        // set document body to backgroundColor
+        document.body.style.backgroundColor = this.config.colors.backgroundColor;
+
+        // set loading indicator to textColor
+        document.querySelector('#loading').style.color = this.config.colors.textColor;
         
         // make a list of assets
         const gameAssets = [
