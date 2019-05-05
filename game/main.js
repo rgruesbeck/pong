@@ -20,6 +20,8 @@
  *   Most things to change will be in the play function
  */
 
+import Koji from 'koji-tools';
+
 import {
     requestAnimationFrame,
     cancelAnimationFrame
@@ -42,12 +44,11 @@ class Game {
 
     constructor(canvas, overlay, topbar, config) {
         this.config = config; // customization
+        this.topbar = topbar;
         this.overlay = overlay;
 
         this.canvas = canvas; // game screen
         this.ctx = canvas.getContext("2d"); // game screen context
-        this.canvas.width = window.innerWidth; // set game screen width
-        this.canvas.height = topbar.active ? window.innerHeight - this.topbar.clientHeight : window.innerHeight; // set game screen height
 
         // frame count, rate, and time
         // this is just a place to keep track of frame rate (not set it)
@@ -62,7 +63,6 @@ class Game {
         this.state = {
             current: 'ready',
             prev: 'loading',
-            winScore: this.config.settings.winScore,
             paused: false,
             muted: localStorage.getItem('game-muted') === 'true'
         };
@@ -74,15 +74,6 @@ class Game {
             touch: { x: 0, y: 0 },
         };
 
-        this.screen = {
-            top: 0,
-            bottom: this.canvas.height,
-            left: 0,
-            right: this.canvas.width,
-            centerX: this.canvas.width / 2,
-            centerY: this.canvas.height / 2,
-            scale: ((this.canvas.width + this.canvas.height) / 2) * 0.003
-        };
 
         this.images = {}; // place to keep images
         this.sounds = {}; // place to keep sounds
@@ -119,16 +110,35 @@ class Game {
         // load pictures, sounds, and fonts
 
         // set topbar and topbar color
-        this.topbar = topbar;
         this.topbar.active = this.config.settings.gameTopBar;
         this.topbar.style.display = this.topbar.active ? 'block' : 'none';
         this.topbar.style.backgroundColor = this.config.colors.primaryColor;
+
+        this.canvas.width = window.innerWidth; // set game screen width
+        this.canvas.height = this.topbar.active ? window.innerHeight - this.topbar.clientHeight : window.innerHeight; // set game screen height
+
+        this.screen = {
+            top: 0,
+            bottom: this.canvas.height,
+            left: 0,
+            right: this.canvas.width,
+            centerX: this.canvas.width / 2,
+            centerY: this.canvas.height / 2,
+            scale: ((this.canvas.width + this.canvas.height) / 2) * 0.003
+        };
+
 
         // set document body to backgroundColor
         document.body.style.backgroundColor = this.config.colors.backgroundColor;
 
         // set loading indicator to textColor
         document.querySelector('#loading').style.color = this.config.colors.textColor;
+
+        // set winscore
+        this.setState({ winScore: this.config.settings.winScore });
+
+        // set overlay styles
+        this.overlay.setStyles({...this.config.colors, ...this.config.settings});
         
         // make a list of assets
         const gameAssets = [
@@ -183,18 +193,6 @@ class Game {
             bounds: this.screen
         });
 
-
-        // field
-        this.field = new Image({
-            ctx: this.ctx,
-            image: this.images.backgroundImage,
-            x: 0,
-            y: 0,
-            width: this.screen.right,
-            height: this.screen.bottom
-        });
-
-
         // ball
         let ballWidth = 20 * scale;
         let ballHeight = 20 * scale;
@@ -215,9 +213,16 @@ class Game {
             }
         })
 
-
-        // set overlay styles
-        this.overlay.setStyles({...this.config.colors, ...this.config.settings});
+        // background
+        let maxWidth = 700;
+        this.background = new Image({
+            ctx: this.ctx,
+            image: this.images.backgroundImage,
+            x: this.screen.right > maxWidth ? (this.screen.right - maxWidth) / 2 : 0,
+            y: 0,
+            width: Math.min(this.screen.right, maxWidth),
+            height: this.screen.bottom
+        });
 
         this.play();
     }
@@ -232,7 +237,9 @@ class Game {
 
         // draw and do stuff that you need to do
         // no matter the game state
-        this.field.draw();
+        if (this.background) {
+            this.background.draw();
+        }
 
         this.ctx.globalAlpha = 1;
 
@@ -245,8 +252,8 @@ class Game {
             this.overlay.hideLoading();
             this.canvas.style.opacity = 1;
 
-            this.overlay.setBanner('Game');
-            this.overlay.setButton('Play');
+            this.overlay.setBanner(this.config.settings.name);
+            this.overlay.setButton(this.config.settings.startText);
             this.overlay.showStats();
 
             this.overlay.setMute(this.state.muted);
@@ -257,10 +264,6 @@ class Game {
                 mobile: this.config.settings.instructionsMobile
             });
 
-            //dev
-            //this.setState({ current: 'play' });
-            // this.overlay.hideBanner();
-            // this.overlay.hideButton();
         }
 
         // game play
