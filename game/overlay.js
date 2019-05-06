@@ -92,11 +92,11 @@ class Overlay {
     }
 
     setScore1(score) {
-        this.score1.textContent = `Player: ${score}`;
+        this.score1.textContent = `P1: ${score}`;
     }
 
     setScore2(score) {
-        this.score2.textContent = `Computer: ${score}`;
+        this.score2.textContent = `P2: ${score}`;
     }
 
     setStyles(styles) {

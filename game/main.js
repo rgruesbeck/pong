@@ -68,11 +68,18 @@ class Game {
         };
 
         this.input = {
-            active: 'keyboard',
+            active: true,
+            current: 'keyboard',
             keyboard: { up: false, right: false, left: false, down: false },
             mouse: { x: 0, y: 0, click: false },
             touch: { x: 0, y: 0 },
         };
+
+        this.input2 = {
+            active: false,
+            current: 'keyboard',
+            keyboard: { up: false, right: false, left: false, down: false }
+        }
 
 
         this.images = {}; // place to keep images
@@ -128,8 +135,6 @@ class Game {
         };
 
 
-        // set document body to backgroundColor
-        document.body.style.backgroundColor = this.config.colors.backgroundColor;
 
         // set loading indicator to textColor
         document.querySelector('#loading').style.color = this.config.colors.textColor;
@@ -216,13 +221,12 @@ class Game {
         })
 
         // background
-        let maxWidth = 700;
         this.background = new Image({
             ctx: this.ctx,
             image: this.images.backgroundImage,
-            x: this.screen.right > maxWidth ? (this.screen.right - maxWidth) / 2 : 0,
+            x: 0,
             y: 0,
-            width: Math.min(this.screen.right, maxWidth),
+            width: this.screen.right,
             height: this.screen.bottom
         });
 
@@ -233,8 +237,6 @@ class Game {
         // update game characters
 
         // clear the screen of the last picture
-        this.ctx.globalAlpha = 0.3;
-        this.ctx.fillStyle = this.config.colors.backgroundColor; 
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // draw and do stuff that you need to do
@@ -243,7 +245,6 @@ class Game {
             this.background.draw();
         }
 
-        this.ctx.globalAlpha = 1;
 
         // update scores
         this.overlay.setScore1(`${this.player1.score}/${this.state.winScore}`);
@@ -290,18 +291,18 @@ class Game {
             if (!this.state.muted) { this.sounds.backgroundMusic.play(); }
 
             // player 1
-            if (this.input.active === 'keyboard') {
+            if (this.input.current === 'keyboard') {
                 let dy1 = (this.input.keyboard.up ? -1 : 0) + (this.input.keyboard.down ? 1 : 0);
                 this.player1.move(0, dy1, this.frame.scale);
             }
 
-            if (this.input.active === 'mouse') {
+            if (this.input.current === 'mouse') {
                 let y = this.input.mouse.y - this.canvas.offsetTop;
                 let diffY =  y - this.player1.y - this.player1.height / 2;
                 this.player1.move(0, diffY / 100, 1);
             }
             
-            if (this.input.active === 'touch') {
+            if (this.input.current === 'touch') {
                 let y = this.input.touch.y - this.canvas.offsetTop;
                 let diffY =  y - this.player1.y - this.player1.height / 2;
                 this.player1.move(0, diffY / 100, 1);
@@ -309,8 +310,8 @@ class Game {
 
             this.player1.draw();
 
-            // player 2 (computer)
-            if (this.ball.launched && this.ball.dx < 0) {
+            // player 2: computer
+            if (!this.input2.active && this.ball.launched && this.ball.dx < 0) {
 
                 // move computer player toward the ball
                 // get diffY and calculate dy
@@ -322,6 +323,13 @@ class Game {
                 let speedLimit = difficulty / 2;
                 let dy2capped = boundBy(dy2, speedLimit, -speedLimit);
                 this.player2.move(0, dy2capped, this.frame.scale);
+            }
+
+            // player 2: human
+            if (this.input2.active) {
+                // move player 2
+                let dy2 = (this.input2.keyboard.up ? -1 : 0) + (this.input2.keyboard.down ? 1 : 0);
+                this.player2.move(0, dy2, this.frame.scale);
             }
 
             this.player2.draw();
@@ -369,8 +377,16 @@ class Game {
                 // reset ball speed
                 this.ball.speed = this.config.settings.ballSpeed;
 
-                this.ball.setY(this.player2.y);
-                this.ball.launch(3000, 1, this.player2.width);
+                if (this.input2.active) {
+                    // wait for player2 human to relaunch
+
+                    this.ball.stop();
+                } else {
+                    // player2 computer to relaunch after 3 seconds
+
+                    this.ball.setY(this.player2.y);
+                    this.ball.launch(3000, 1, this.player2.width);
+                }
             }
 
             // if ball touches right side, player2 scores
@@ -394,20 +410,36 @@ class Game {
 
         // player wins
         if (this.state.current === 'win-player1') {
-            this.overlay.setBanner('Winner!')
+            this.overlay.setBanner('Player 1 Wins!')
         }
 
         if (this.state.current === 'win-player2') {
-            this.overlay.setBanner('Try again!')
+            this.overlay.setBanner('Player 2 Wins!')
         }
 
         // draw the next screen
         this.requestFrame(() => this.play());
     }
 
-    relaunchBall() {
-        this.ball.setY(this.player1.y);
-        this.ball.launch(null, -1, this.player1.width);
+    relaunchBall(side) {
+        // ignore if ball is launched
+        if (this.ball.launched) { return; }
+
+        // reset ball speed
+        this.ball.speed = this.config.settings.ballSpeed;
+
+        // launch from right
+        if (side === 'right') {
+            this.ball.setY(this.player1.y);
+            this.ball.launch(null, -1, this.player1.width);
+        }
+
+        // launch from left
+        if (side === 'left') {
+            this.ball.setY(this.player2.y);
+            this.ball.launch(null, 1, this.player2.width);
+        }
+
     }
 
     // event listeners
@@ -440,7 +472,7 @@ class Game {
         // relaunch ball
         let onSide = this.ball.launched === false && this.ball.x > this.screen.centerX;
         if (this.state.current === 'play' && onSide) {
-            this.relaunchBall();
+            this.relaunchBall('right');
         }
 
         if (this.state.current.includes('win')) {
@@ -449,20 +481,15 @@ class Game {
     }
 
     handleKeyboardInput(type, code) {
-        this.input.active = 'keyboard';
+        this.input.current = 'keyboard';
 
+        // player 1
         if (type === 'keydown') {
             if (code === 'ArrowUp') {
                 this.input.keyboard.up = true
             }
-            if (code === 'ArrowRight') {
-                this.input.keyboard.right = true
-            }
             if (code === 'ArrowDown') {
                 this.input.keyboard.down = true
-            }
-            if (code === 'ArrowLeft') {
-                this.input.keyboard.left = true
             }
         }
 
@@ -470,44 +497,74 @@ class Game {
             if (code === 'ArrowUp') {
                 this.input.keyboard.up = false
             }
-            if (code === 'ArrowRight') {
-                this.input.keyboard.right = false
-            }
             if (code === 'ArrowDown') {
                 this.input.keyboard.down = false
             }
-            if (code === 'ArrowLeft') {
-                this.input.keyboard.left = false
-            }
 
-            // KeyP: pause and play game
-            if (code === 'KeyP') {
-                this.pause();
-            }
-
-            // Launch ball or Start
-            if (code === 'Space' || code === 'Enter') {
-                let onSide = this.ball.launched === false && this.ball.x > this.screen.centerX;
-                if (this.state.current === 'play' && onSide) {
-                    this.relaunchBall()
-                }
-
-                if (this.state.current.includes('win')) {
-                    document.location.reload();
+            // relaunch player 1
+            if (code === 'Space') {
+                let rightSide = this.ball.launched === false && this.ball.x > this.screen.centerX;
+                if (this.state.current === 'play' && rightSide) {
+                    this.relaunchBall('right')
                 }
             }
+        }
+
+
+
+        // player 2
+        if (type === 'keydown') {
+            if (code === 'KeyW') {
+                this.input2.keyboard.up = true;
+            }
+            if (code === 'KeyS') {
+                this.input2.keyboard.down = true;
+            }
+
+            // relaunch player 2
+            if (code === 'ShiftLeft') {
+                let rightSide = this.ball.launched === false && this.ball.x > this.screen.centerX;
+                if (this.state.current === 'play' && !rightSide) {
+                    this.relaunchBall('left')
+                }
+            }
+        }
+
+        if (type === 'keyup') {
+            if (code === 'KeyW') {
+                this.input2.keyboard.up = false;
+            }
+            if (code === 'KeyS') {
+                this.input2.keyboard.down = false;
+            }
+
+        }
+
+        // game state
+
+        // switch to 2 player if W or S are pressed
+        if (type === 'keydown' && ['KeyW', 'KeyS'].includes(code) && !this.input2.active) {
+            this.input2.active = true;
+        }
+
+        // pause and play game if P is pressed
+        if (type === 'keydown' && code === 'KeyP') { this.pause(); }
+
+        // reload game after win and Spacebar pressed
+        if (type === 'keyup' && code === 'Space' && this.state.current.includes('win')) {
+            document.location.reload();
         }
     }
 
     handleMouseMove(y) {
-        this.input.active = 'mouse';
+        this.input.current = 'mouse';
         this.input.mouse.y = y;
     }
 
     handleTouchMove(touch) {
         let { clientY } = touch;
 
-        this.input.active = 'touch';
+        this.input.current = 'touch';
         this.input.touch.y = clientY;
     }
 
