@@ -245,7 +245,6 @@ class Game {
             this.background.draw();
         }
 
-
         // update scores
         this.overlay.setScore1(`${this.player1.score}/${this.state.winScore}`);
         this.overlay.setScore2(`${this.player2.score}/${this.state.winScore}`);
@@ -410,11 +409,11 @@ class Game {
 
         // player wins
         if (this.state.current === 'win-player1') {
-            this.overlay.setBanner('Player 1 Wins!')
+            this.overlay.setBanner(this.config.settings.player1WinText);
         }
 
         if (this.state.current === 'win-player2') {
-            this.overlay.setBanner('Player 2 Wins!')
+            this.overlay.setBanner(this.config.settings.player2WinText);
         }
 
         // draw the next screen
