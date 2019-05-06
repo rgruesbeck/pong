@@ -1,8 +1,7 @@
 {
   "colors": {
     "textColor": "#391a87",
-    "primaryColor": "#01c4c8",
-    "backgroundColor": "white"
+    "primaryColor": "#01c4c8"
   },
   "@@editor": [
     {
@@ -20,11 +19,6 @@
         {
           "key": "primaryColor",
           "name": "Primary Color",
-          "type": "color"
-        },
-        {
-          "key": "backgroundColor",
-          "name": "Background color",
           "type": "color"
         }
       ]

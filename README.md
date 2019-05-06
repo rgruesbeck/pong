@@ -13,7 +13,6 @@ A perfect example game for new game makers, created from the [Games with JavaScr
 ### Colors
   * Text Color
   * Primary Color
-  * Background Color
   * Font family
 ### Game Settings
   * Start Button Text
