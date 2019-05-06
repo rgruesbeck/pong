@@ -91,7 +91,6 @@ canvas {
     opacity: 0;
     flex: auto;
     padding: 1em;
-    font-size: 1.5em;
     border-radius: 100px;
     text-align: center;
     transition: opacity 1s;
@@ -105,7 +104,6 @@ canvas {
     top: 0;
     left: 0;
     transition: opacity 3s;
-    font-size: 1.25em;
 }
 
 .container #score2 {
@@ -116,7 +114,6 @@ canvas {
     top: 1em;
     left: 0;
     transition: opacity 3s;
-    font-size: 1.25em;
 }
 
 .container #mute {
@@ -134,7 +131,6 @@ canvas {
     border-radius: 100%;
     cursor: pointer;
     transition: opacity 3s;
-    font-size: 1.5em;
 }
 
 .container #pause {
@@ -152,7 +148,6 @@ canvas {
     border-radius: 100%;
     cursor: pointer;
     transition: opacity 3s;
-    font-size: 1.5em;
 }
 
 /*!
