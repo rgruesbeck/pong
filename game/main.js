@@ -140,7 +140,7 @@ class Game {
         document.querySelector('#loading').style.color = this.config.colors.textColor;
 
         // set winscore
-        this.setState({ winScore: this.config.settings.winScore });
+        this.setState({ winScore: parseInt(this.config.settings.winScore) });
 
         // set overlay styles
         this.overlay.setStyles({...this.config.colors, ...this.config.settings});
@@ -200,7 +200,9 @@ class Game {
         });
 
         // ball
-        let { ballSpeed, ballSize } = this.config.settings;
+        let ballSpeed = parseInt(this.config.settings.ballSpeed);
+        let ballSize = parseInt(this.config.settings.ballSize);
+
         let ballWidth =  ballSize * scale;
         let ballHeight = ballSize * scale;
 
@@ -318,7 +320,7 @@ class Game {
                 let dy2 = diffY / (this.ball.x * 2); 
 
                 // apply a difficulty/speed limit
-                let { difficulty } = this.config.settings
+                let difficulty = parseInt(this.config.settings);
                 let speedLimit = difficulty / 2;
                 let dy2capped = boundBy(dy2, speedLimit, -speedLimit);
                 this.player2.move(0, dy2capped, this.frame.scale);
@@ -374,7 +376,7 @@ class Game {
                 this.player1.score += 1;
 
                 // reset ball speed
-                this.ball.speed = this.config.settings.ballSpeed;
+                this.ball.speed = parseInt(this.config.settings.ballSpeed);
 
                 if (this.input2.active) {
                     // wait for player2 human to relaunch
@@ -398,7 +400,7 @@ class Game {
                 this.player2.score += 1;
 
                 // reset ball speed
-                this.ball.speed = this.config.settings.ballSpeed;
+                this.ball.speed = parseInt(this.config.settings.ballSpeed);
 
                 this.ball.stop();
             }
@@ -425,7 +427,7 @@ class Game {
         if (this.ball.launched) { return; }
 
         // reset ball speed
-        this.ball.speed = this.config.settings.ballSpeed;
+        this.ball.speed = parseInt(this.config.settings.ballSpeed);
 
         // launch from right
         if (side === 'right') {
