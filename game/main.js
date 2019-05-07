@@ -61,8 +61,8 @@ class Game {
 
         // game settings
         this.state = {
-            current: 'ready',
-            prev: 'loading',
+            current: 'loading',
+            prev: null,
             paused: false,
             muted: localStorage.getItem('game-muted') === 'true'
         };
@@ -232,6 +232,8 @@ class Game {
             height: this.screen.bottom
         });
 
+        // set game state ready
+        this.setState({ current: 'ready' });
         this.play();
     }
 
@@ -444,8 +446,8 @@ class Game {
     }
 
     // event listeners
-
     handleClicks(target) {
+        if (this.state.current === 'loading') { return; }
 
         // mute
         if (target.id === 'mute') {
