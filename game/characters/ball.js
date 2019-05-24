@@ -61,7 +61,7 @@ class Ball extends ImageSprite {
         let distanceX = Math.abs(entity.cx - this.cx);
         let onY = this.cy > entity.y && this.cy < entity.y + entity.height;
 
-        return onY && distanceX < (entity.width / 2 + this.width / 2);
+        return onY && distanceX < (entity.width  + this.width) / 2;
     }
 }
 

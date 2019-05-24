@@ -1,6 +1,8 @@
 {
   "colors": {
     "textColor": "#391a87",
+    "rightPaddleColor": "#d404b3",
+    "leftPaddleColor": "#01c4c8",
     "primaryColor": "#01c4c8"
   },
   "@@editor": [
@@ -14,6 +16,18 @@
           "key": "textColor",
           "name": "Text color",
           "description": "Default color for text",
+          "type": "color"
+        },
+        {
+          "key": "rightPaddleColor",
+          "name": "Right paddle color",
+          "description": "Default color for right paddle",
+          "type": "color"
+        },
+        {
+          "key": "leftPaddleColor",
+          "name": "Left paddle color",
+          "description": "Default color for left paddle",
           "type": "color"
         },
         {

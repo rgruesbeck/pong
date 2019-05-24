@@ -178,7 +178,7 @@ class Game {
         this.player1 = new Player({
             name: 'player1',
             ctx: this.ctx,
-            color: this.config.colors.textColor,
+            color: this.config.colors.rightPaddleColor,
             x: right - pWidth,
             y: centerY - pHeight / 2,
             width: pWidth,
@@ -190,7 +190,7 @@ class Game {
         this.player2 = new Player({
             name: 'player2',
             ctx: this.ctx,
-            color: this.config.colors.textColor,
+            color: this.config.colors.leftPaddleColor,
             x: 0,
             y: centerY - pHeight / 2,
             width: pWidth,
