@@ -661,7 +661,7 @@ class Game {
         this.frame = {
             count: requestAnimationFrame(next),
             time: now,
-            rate: resumed ? now : now - this.frame.time,
+            rate: resumed ? 0 : now - this.frame.time,
             scale: this.screen.scale * this.frame.rate * 0.01
         };
     }
