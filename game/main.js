@@ -38,6 +38,8 @@ import audioContext from 'audio-context';
 import audioPlayback from 'audio-play';
 import unlockAudioContext from 'unlock-audio-context';
 
+import preventParent from 'prevent-parent';
+
 import { boundBy, hashCode } from './helpers/utils.js';
 
 import Image from './objects/image.js';
@@ -59,6 +61,9 @@ class Game {
         this.audioCtx = audioContext(); // create new audio context
         unlockAudioContext(this.audioCtx);
         this.playlist = [];
+
+	// prevent parent wondow form scrolling
+	preventParent();
 
         // frame count, rate, and time
         // this is just a place to keep track of frame rate (not set it)
